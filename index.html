@@ -1,81 +1,132 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CuisiRecettes · Pink Paradise</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html, body { width:100%; height:100%; overflow:hidden; background:#000; }
-
-    iframe {
-      width:100%;
-      height:100%;
-      border:none;
-      display:block;
-    }
-
-    #fallback {
-      display:none;
-      position:fixed;
-      inset:0;
-      background:#0a0a0f;
-      color:#e8e0f0;
-      font-family:monospace;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:1.5rem;
-      text-align:center;
-      padding:2rem;
-    }
-    #fallback.on { display:flex; }
-    #fallback p { color:#7a7a9a; font-size:.82rem; line-height:1.9; }
-    #fallback a {
-      background:#ff2d78;
-      color:#fff;
-      text-decoration:none;
-      padding:.8rem 2rem;
-      border-radius:8px;
-      font-size:.82rem;
-      font-weight:700;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConverTube - Convertisseur Multimédia MP3/MP4</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .message-box {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white; padding: 24px;
+            border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000; display: none; text-align: center; max-width: 90vw;
+        }
+        .message-box.show { display: block; }
+        .message-box button {
+            margin-top: 16px; padding: 10px 20px;
+            background-color: #ef4444; color: white;
+            border: none; border-radius: 8px; cursor: pointer;
+        }
+        .message-box button:hover { background-color: #dc2626; }
+        #converterFrame {
+            width: 100%; border: none; display: none;
+            border-radius: 8px; min-height: 360px;
+        }
+        .ad-banner {
+            display: block; width: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 10px; padding: 12px 20px;
+            text-decoration: none; margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: opacity 0.2s;
+        }
+        .ad-banner:hover { opacity: 0.9; }
+        .ad-inner { display: flex; align-items: center; justify-content: space-between; }
+        .ad-label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+        .ad-text { color: #fff; font-size: 14px; font-weight: 500; }
+        .ad-sub { color: rgba(255,255,255,0.6); font-size: 12px; }
+        .ad-cta { background: #ef4444; color: white; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; white-space: nowrap; margin-left: 12px; }
+    </style>
 </head>
-<body>
+<body class="bg-gradient-to-r from-red-500 to-blue-500 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 md:p-12 rounded-xl shadow-2xl max-w-lg w-full text-center">
 
-  <iframe
-    id="fr"
-    src="https://cuisirecettes.lovable.app"
-    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads allow-top-navigation"
-    referrerpolicy="no-referrer-when-downgrade"
-  ></iframe>
+        <img src="logo.png" alt="ConverTube Logo" class="mx-auto mb-4" style="max-width:220px;">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">ConverTube</h1>
+        <p class="text-lg text-gray-600 mb-6">Collez l'URL d'une vidéo YouTube, TikTok ou Instagram et choisissez votre format.</p>
 
-  <div id="fallback">
-    <div style="font-size:2.5rem">🚫</div>
-    <p>
-      <strong>Iframe bloquée</strong><br/>
-      webhooky.base44.app refuse d'être chargée ici.<br/>
-      (X-Frame-Options / CSP)
-    </p>
-    <a href="https://cuisirecettes.lovable.app" target="_blank">Ouvrir directement →</a>
-  </div>
+        <!-- Pub -->
+        <a class="ad-banner" href="https://www.effectivecpmnetwork.com/wzyt0vg7rj?key=a7e26d974f81527a4d20ec24075d1e42" target="_blank" rel="noopener">
+            <div class="ad-label">Publicité</div>
+            <div class="ad-inner">
+                <div>
+                    <div class="ad-text">🎵 Télécharge de la musique gratuitement</div>
+                    <div class="ad-sub">Accède à des milliers de sons sans limite</div>
+                </div>
+                <span class="ad-cta">Voir →</span>
+            </div>
+        </a>
 
-  <script>
-    // Timeout fallback : si l'iframe ne charge pas en 8s
-    const fr = document.getElementById('fr');
-    const fb = document.getElementById('fallback');
+        <div class="mb-6">
+            <input type="text" id="mediaUrl" placeholder="Ex: https://www.youtube.com/watch?v=..."
+                   class="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
+        </div>
 
-    const t = setTimeout(() => {
-      try {
-        const d = fr.contentDocument;
-        if (!d || !d.body || d.body.innerHTML.trim() === '') fb.classList.add('on');
-      } catch { /* cross-origin = probablement ok */ }
-    }, 8000);
+        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+            <button id="convertMp3"
+                    class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                🎵 Convertir en MP3
+            </button>
+            <button id="convertMp4"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 text-lg">
+                🎬 Convertir en MP4
+            </button>
+        </div>
 
-    fr.addEventListener('load', () => clearTimeout(t));
-    fr.addEventListener('error', () => { clearTimeout(t); fb.classList.add('on'); });
-  </script>
+        <div id="status" class="text-base font-medium text-gray-500 mb-4 min-h-[24px]"></div>
 
+        <!-- iframe vevioz -->
+        <iframe id="converterFrame" allowtransparency="true" scrolling="no"></iframe>
+
+        <p class="text-xs text-gray-400 mt-4">Supporte YouTube · TikTok · Instagram · SoundCloud · Dailymotion et +</p>
+    </div>
+
+    <div id="messageBox" class="message-box">
+        <p id="messageText" class="text-gray-800 text-lg mb-4"></p>
+        <button id="closeMessageBox">Fermer</button>
+    </div>
+
+    <script>
+        const mediaUrlInput = document.getElementById('mediaUrl');
+        const statusDiv = document.getElementById('status');
+        const frame = document.getElementById('converterFrame');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+
+        function showCustomMessage(msg) {
+            messageText.textContent = msg;
+            messageBox.classList.add('show');
+        }
+        document.getElementById('closeMessageBox').addEventListener('click', function() {
+            messageBox.classList.remove('show');
+        });
+
+        document.getElementById('convertMp3').addEventListener('click', function() { convert('mp3'); });
+        document.getElementById('convertMp4').addEventListener('click', function() { convert('mp4'); });
+
+        function convert(format) {
+            var url = mediaUrlInput.value.trim();
+            if (!url) {
+                showCustomMessage('Veuillez entrer une URL de vidéo (YouTube, TikTok ou Instagram).');
+                return;
+            }
+            var mediaRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|tiktok\.com|instagram\.com)\/.+$/;
+            if (!mediaRegex.test(url)) {
+                showCustomMessage("L'URL entrée ne semble pas être une URL valide (YouTube, TikTok ou Instagram).");
+                return;
+            }
+            statusDiv.textContent = 'Chargement du convertisseur...';
+            frame.style.display = 'none';
+            var apiUrl = 'https://api.vevioz.com/api/button/' + format + '?url=' + encodeURIComponent(url);
+            frame.src = apiUrl;
+            frame.onload = function() {
+                statusDiv.textContent = '';
+                frame.style.display = 'block';
+            };
+        }
+    </script>
 </body>
 </html>
